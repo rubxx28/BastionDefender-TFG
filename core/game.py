@@ -1,5 +1,6 @@
 import pygame
-from settings import WIDTH, HEIGHT, FPS, GRAY
+from settings import WIDTH, HEIGHT, FPS
+from core.map import GameMap
 
 class Game:
     def __init__(self):
@@ -7,6 +8,8 @@ class Game:
         pygame.display.set_caption("Bastion Defender")
         self.clock = pygame.time.Clock()
         self.running = True
+
+        self.game_map = GameMap()
 
     def run(self):
         while self.running:
@@ -24,5 +27,5 @@ class Game:
         pass
 
     def draw(self):
-        self.screen.fill(GRAY)
+        self.game_map.draw(self.screen)
         pygame.display.flip()
