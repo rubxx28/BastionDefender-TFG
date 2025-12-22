@@ -4,36 +4,50 @@ import math
 class Enemy:
     def __init__(self, path):
         self.path = path
-        self.current_point = 0
+        self.index = 0
 
         self.x, self.y = self.path[0]
-        self.speed = 2
-        self.radius = 12
-
-        self.health = 100
+        self.speed = 2.2
         self.alive = True
 
+        self.image_base = pygame.image.load(
+            "assets/imagenes/enemies/enemie1Basic.png"
+        ).convert_alpha()
+
+        self.image_base = pygame.transform.scale(self.image_base, (32, 32))
+        self.image = self.image_base
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
+        # Animación
+        self.walk_phase = 0
+
     def update(self):
-        if self.current_point >= len(self.path) - 1:
+        if self.index >= len(self.path) - 1:
             self.alive = False
             return
 
-        target_x, target_y = self.path[self.current_point + 1]
+        tx, ty = self.path[self.index + 1]
+        dx = tx - self.x
+        dy = ty - self.y
+        dist = math.hypot(dx, dy)
 
-        dx = target_x - self.x
-        dy = target_y - self.y
-        distance = math.hypot(dx, dy)
-
-        if distance < self.speed:
-            self.current_point += 1
+        if dist < self.speed:
+            self.index += 1
         else:
-            self.x += dx / distance * self.speed
-            self.y += dy / distance * self.speed
+            self.x += dx / dist * self.speed
+            self.y += dy / dist * self.speed
+
+        # Orientación
+        if dx < 0:
+            self.image = pygame.transform.flip(self.image_base, True, False)
+        else:
+            self.image = self.image_base
+
+        # Animación de caminar (muy visible)
+        self.walk_phase += 0.25
+        y_offset = math.sin(self.walk_phase) * 4
+
+        self.rect.center = (self.x, self.y + y_offset)
 
     def draw(self, screen):
-        pygame.draw.circle(
-            screen,
-            (150, 0, 0),  # rojo oscuro medieval
-            (int(self.x), int(self.y)),
-            self.radius
-        )
+        screen.blit(self.image, self.rect)
