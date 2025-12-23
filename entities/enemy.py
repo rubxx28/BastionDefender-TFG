@@ -1,53 +1,77 @@
 import pygame
 import math
 
+
 class Enemy:
     def __init__(self, path):
         self.path = path
         self.index = 0
 
-        self.x, self.y = self.path[0]
-        self.speed = 2.2
-        self.alive = True
+        # Posición inicial (spawn)
+        self.x, self.y = path[0]
+        self.speed = 1.2
 
-        self.image_base = pygame.image.load(
+        # Vida
+        self.max_hp = 60
+        self.hp = self.max_hp
+
+        # Estados
+        self.alive = True
+        self.reached_goal = False
+
+        # Imagen
+        self.image = pygame.image.load(
             "assets/imagenes/enemies/enemie1Basic.png"
         ).convert_alpha()
 
-        self.image_base = pygame.transform.scale(self.image_base, (32, 32))
-        self.image = self.image_base
+        self.image = pygame.transform.scale(self.image, (48, 48))
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
-        # Animación
-        self.walk_phase = 0
+    def take_damage(self, damage):
+        self.hp -= damage
+        if self.hp <= 0:
+            self.alive = False
+            self.reached_goal = False  # 💀 muerto por daño
 
     def update(self):
-        if self.index >= len(self.path) - 1:
-            self.alive = False
+        if not self.alive:
             return
 
-        tx, ty = self.path[self.index + 1]
-        dx = tx - self.x
-        dy = ty - self.y
-        dist = math.hypot(dx, dy)
+        # Seguir el camino
+        if self.index < len(self.path) - 1:
+            tx, ty = self.path[self.index + 1]
+            dx = tx - self.x
+            dy = ty - self.y
+            dist = math.hypot(dx, dy)
 
-        if dist < self.speed:
-            self.index += 1
+            if dist < self.speed:
+                self.index += 1
+            else:
+                self.x += dx / dist * self.speed
+                self.y += dy / dist * self.speed
+
+            self.rect.center = (self.x, self.y)
+
         else:
-            self.x += dx / dist * self.speed
-            self.y += dy / dist * self.speed
-
-        # Orientación
-        if dx < 0:
-            self.image = pygame.transform.flip(self.image_base, True, False)
-        else:
-            self.image = self.image_base
-
-        # Animación de caminar (muy visible)
-        self.walk_phase += 0.25
-        y_offset = math.sin(self.walk_phase) * 4
-
-        self.rect.center = (self.x, self.y + y_offset)
+            # 🚪 Llegó a la puerta
+            self.alive = False
+            self.reached_goal = True
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+
+        # Barra de vida
+        bar_width = 40
+        health_ratio = self.hp / self.max_hp
+
+        pygame.draw.rect(
+            screen,
+            (60, 60, 60),
+            (self.x - bar_width // 2, self.y - 30, bar_width, 5)
+        )
+
+        pygame.draw.rect(
+            screen,
+            (200, 0, 0),
+            (self.x - bar_width // 2, self.y - 30, bar_width * health_ratio, 5)
+        )

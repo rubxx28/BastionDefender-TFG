@@ -13,5 +13,4 @@ GRAY = (40, 40, 40)
 RED = (200, 50, 50)
 BLUE = (50, 50, 200)
 
-GREEN = (34, 139, 34)    # Césped
-BROWN = (139, 69, 19)    # Camino de tierra
+
