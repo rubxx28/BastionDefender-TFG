@@ -259,7 +259,7 @@ class MusketeerTower(BaseTower):
 
         self.range = 150
         self.damage = 25
-        self.fire_rate = 55
+        self.fire_rate = 60
 
         self.cost = 50
         self.total_cost = self.cost
@@ -292,7 +292,7 @@ class CannonTower(BaseTower):
         super().__init__(x, y)
 
         self.range = 130
-        self.damage = 45
+        self.damage = 55
         self.fire_rate = 90
 
         self.cost = 100
@@ -328,7 +328,7 @@ class MagicTower(BaseTower):
 
         self.range = 160
         self.damage = 30
-        self.fire_rate = 70
+        self.fire_rate = 75
 
         self.cost = 150
         self.total_cost = self.cost
