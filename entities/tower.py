@@ -42,9 +42,17 @@ class BaseTower:
         self.level_font = pygame.font.SysFont("arial", 14)
 
         # Cost tracking
-        self.upgrade_cost = 75
         self.cost = 0
         self.total_cost = 0
+        self.upgrade_cost = self.calculate_upgrade_cost()
+
+    # -------------------------
+    # CALCULAR COSTO DE MEJORA
+    # -------------------------
+    def calculate_upgrade_cost(self):
+        """Calcula el costo de mejora basado en el tipo de torre y nivel actual"""
+        # Sobrescribir en subclases si es necesario
+        return 75
 
     # -------------------------
     # BUSCAR OBJETIVO
@@ -159,6 +167,9 @@ class BaseTower:
 
         # registrar coste de la mejora
         self.total_cost += self.upgrade_cost
+        
+        # Recalcular el costo de la siguiente mejora
+        self.upgrade_cost = self.calculate_upgrade_cost()
 
         self.load_image()
 
@@ -170,6 +181,20 @@ class BaseTower:
 
     def sell_refund(self):
         return int(self.total_cost / 2)
+
+    # -------------------------
+    # SHOOT (debe ser implementado por subclases)
+    # -------------------------
+    def shoot(self, enemy, projectiles, enemies):
+        """Método que debe ser sobrescrito por las subclases"""
+        pass
+
+    # -------------------------
+    # LOAD IMAGE (debe ser implementado por subclases)
+    # -------------------------
+    def load_image(self):
+        """Método que debe ser sobrescrito por las subclases"""
+        pass
 
     # -------------------------
     # DIBUJO
@@ -266,6 +291,10 @@ class MusketeerTower(BaseTower):
 
         self.load_image()
 
+    def calculate_upgrade_cost(self):
+        """Costo de mejora para torres de mosqueteros: 40 + 30 por nivel"""
+        return 40 + (self.level * 30)
+
     def load_image(self):
         if self.level == 1:
             img_path = "assets/imagenes/towers/mosquetera1.png"
@@ -299,6 +328,10 @@ class CannonTower(BaseTower):
         self.total_cost = self.cost
 
         self.load_image()
+
+    def calculate_upgrade_cost(self):
+        """Costo de mejora para torres de cañón: 60 + 50 por nivel (más cara por ser más fuerte)"""
+        return 60 + (self.level * 50)
 
     def load_image(self):
         if self.level == 1:
@@ -334,6 +367,10 @@ class MagicTower(BaseTower):
         self.total_cost = self.cost
 
         self.load_image()
+
+    def calculate_upgrade_cost(self):
+        """Costo de mejora para torres mágicas: 80 + 40 por nivel (medio término)"""
+        return 80 + (self.level * 40)
 
     def load_image(self):
         if self.level == 1:

@@ -131,8 +131,6 @@ class GameMap:
         screen.fill((0, 0, 0))
         screen.blit(self.background, (self.bg_x, 0))
 
-
-        # Dibujar zonas de torre con icono/base
         for spot in self.tower_spots:
             if spot:
                 self._draw_spot(screen, spot, available=True)

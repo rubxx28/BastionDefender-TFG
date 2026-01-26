@@ -1,44 +1,24 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import sqlite3
-from datetime import datetime
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from api.models import GameResult
+from api.schemas import GameResultRead, GameResultCreate
+from api.database import Base, engine, get_db
 
 app = FastAPI()
 
-# -----------------------
-# DB
-# -----------------------
-conn = sqlite3.connect("scores.db", check_same_thread=False)
-cur = conn.cursor()
+Base.metadata.create_all(bind=engine)
 
-cur.execute("""
-CREATE TABLE IF NOT EXISTS scores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    waves INTEGER,
-    date TEXT
-)
-""")
-conn.commit()
+@app.post("/score", response_model=GameResultRead)
+def save_score(score: GameResultCreate, db: Session = Depends(get_db)):
+    db_score = GameResult(
+        waves=score.waves,
+        duration_seconds=score.duration_seconds
+    )
+    db.add(db_score)
+    db.commit()
+    db.refresh(db_score)
+    return db_score
 
-# -----------------------
-# MODELOS
-# -----------------------
-class Score(BaseModel):
-    waves: int
-
-# -----------------------
-# ENDPOINTS
-# -----------------------
-
-@app.post("/score")
-def save_score(score: Score):
-    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cur.execute("INSERT INTO scores (waves, date) VALUES (?, ?)", (score.waves, date))
-    conn.commit()
-    return {"status": "ok"}
-
-@app.get("/scores")
-def get_scores():
-    cur.execute("SELECT waves, date FROM scores ORDER BY waves DESC LIMIT 10")
-    rows = cur.fetchall()
-    return [{"waves": w, "date": d} for w, d in rows]
+@app.get("/scores", response_model=list[GameResultRead])
+def get_scores(db: Session = Depends(get_db)):
+    return db.query(GameResult).order_by(GameResult.id.desc()).all()

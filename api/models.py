@@ -1,12 +1,12 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, DateTime
 from datetime import datetime
-from .database import Base
+from api.database import Base
 
 
 class GameResult(Base):
-    __tablename__ = "results"
+    __tablename__ = "game_results"
 
     id = Column(Integer, primary_key=True, index=True)
-    waves = Column(Integer)
-    gold = Column(Integer)
-    date = Column(DateTime, default=datetime.utcnow)
+    waves = Column(Integer, nullable=False)
+    duration_seconds = Column(Integer, nullable=False)
+    played_at = Column(DateTime, default=datetime.utcnow)
