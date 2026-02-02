@@ -10,6 +10,7 @@ class HUD:
         self.font_wave = pygame.font.SysFont("arialblack", 40)
         self.font_countdown = pygame.font.SysFont("arialblack", 96)
         self.font_speed_button = pygame.font.SysFont("arial", 18, bold=True)
+        self.font_id_small = pygame.font.SysFont("arial", 14)  # Fuente pequeña para ID
         self.max_lives = 10
         self.heart_size = 24
         
@@ -48,7 +49,7 @@ class HUD:
             (x, y + 12)
         ])
     
-    def draw(self, screen, lives, gold, wave):
+    def draw(self, screen, lives, gold, wave, player_id=None):
         """Dibujar HUD del juego sin fondo"""
         # Dibujar corazones (10 en total)
         hearts_x = 20
@@ -58,9 +59,9 @@ class HUD:
             self.draw_heart(screen, hearts_x + i * 28, hearts_y, filled=(i < lives))
         
         # Oro (con sombra suave para mejor legibilidad)
-        gold_text = self.font_hud.render(f"🪙 Oro: {gold}", True, (200, 150, 50))
+        gold_text = self.font_hud.render(f"Oro: {gold}", True, (200, 150, 50))
         # Sombra
-        shadow = self.font_hud.render(f"🪙 Oro: {gold}", True, (0, 0, 0))
+        shadow = self.font_hud.render(f"Oro: {gold}", True, (0, 0, 0))
         screen.blit(shadow, (WIDTH - 180, 18))
         screen.blit(gold_text, (WIDTH - 180, 15))
         
@@ -69,6 +70,13 @@ class HUD:
         shadow = self.font_hud.render(f"Oleada {wave}", True, (0, 0, 0))
         screen.blit(shadow, (WIDTH // 2 - wave_text.get_width() // 2 + 1, 18))
         screen.blit(wave_text, (WIDTH // 2 - wave_text.get_width() // 2, 15))
+        
+        # Session ID (esquina inferior izquierda, a la derecha del botón x2)
+        if player_id:
+            id_text = self.font_id_small.render(f"ID: {player_id}", True, (120, 120, 120))
+            id_x = 12 + (self.speed_button_size + self.speed_button_gap) * 3 + 8
+            id_y = HEIGHT - 20
+            screen.blit(id_text, (id_x, id_y))
         
         # Dibujar botones de velocidad
         self.draw_speed_buttons(screen)

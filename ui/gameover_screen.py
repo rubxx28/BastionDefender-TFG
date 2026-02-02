@@ -42,7 +42,7 @@ class GameOverScreen:
             return "exit"
         return None
     
-    def draw(self, screen, waves_survived, gold_used):
+    def draw(self, screen, waves_survived, gold_used, player_id=None):
         """Dibujar pantalla de Game Over"""
         # Overlay oscuro
         overlay = pygame.Surface((WIDTH, HEIGHT))
@@ -64,6 +64,12 @@ class GameOverScreen:
         gold_text = stats_font.render(f"Oro gastado: {gold_used}", True, (200, 150, 50))
         screen.blit(gold_text, 
                    (WIDTH // 2 - gold_text.get_width() // 2, 250))
+        
+        # Mostrar Session ID si está disponible
+        if player_id:
+            player_id_text = self.font_small.render(f"Session ID: {player_id}", True, (100, 200, 255))
+            screen.blit(player_id_text, 
+                       (WIDTH // 2 - player_id_text.get_width() // 2, 310))
         
         # Botones
         mouse = pygame.mouse.get_pos()

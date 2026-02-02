@@ -1,4 +1,5 @@
 import pygame
+import os
 import requests
 import time
 import math
@@ -92,6 +93,54 @@ class Game:
 
         self.start_time = time.time()
         self.score_sent = False
+        # Generar/recuperar player_id persistente para esta instalación (sin login)
+        # Prioridad: 1) PLAYER_ID env var 2) archivo player_id.txt en la raíz del proyecto 3) generar nuevo y guardarlo
+        try:
+            from pathlib import Path
+            root = Path(__file__).resolve().parents[1]
+            pid_file = root / "player_id.txt"
+        except Exception:
+            pid_file = None
+
+        pid_env = os.getenv('PLAYER_ID')
+        if pid_env:
+            try:
+                self.player_id = int(pid_env)
+                # si hay pid_file, actualizarlo para consistencia
+                if pid_file:
+                    try:
+                        pid_file.write_text(str(self.player_id))
+                    except Exception:
+                        pass
+            except Exception:
+                # env var inválida -> continuar con fichero/generación
+                self.player_id = None
+        else:
+            self.player_id = None
+
+        # Si no viene por env, intentar leer fichero
+        if self.player_id is None and pid_file and pid_file.exists():
+            try:
+                val = pid_file.read_text().strip()
+                self.player_id = int(val)
+            except Exception:
+                self.player_id = None
+
+        # Si aún no hay player_id, generar uno nuevo y guardarlo
+        if self.player_id is None:
+            self.player_id = random.randint(100000, 999999)
+            if pid_file:
+                try:
+                    pid_file.write_text(str(self.player_id))
+                except Exception:
+                    pass
+
+    def set_player_id(self, player_id):
+        """Asignar player_id desde código (ej: flujo de login o app móvil)."""
+        try:
+            self.player_id = int(player_id)
+        except Exception:
+            self.player_id = None
 
 
     # -------------------------
@@ -114,7 +163,9 @@ class Game:
                 self.running = False
 
             if self.state == MENU:
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if event.type == pygame.MOUSEMOTION:
+                    self.menu_screen.handle_hover(event.pos)
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.menu_screen.handle_click(event.pos):
                         if self.snd_click:
                             self.snd_click.play()
@@ -455,7 +506,7 @@ class Game:
         # HUD
         # -------------------
         self.hud.set_current_speed(self.game_speed)
-        self.hud.draw(self.screen, self.lives, self.gold, self.wave)
+        self.hud.draw(self.screen, self.lives, self.gold, self.wave, self.player_id)
         
         # Mensaje de oleada
         if self.wave_message_timer > 0:
@@ -482,7 +533,7 @@ class Game:
             self.screen.blit(text, (x + 20, y + 12))
 
     def draw_game_over(self):
-        self.gameover_screen.draw(self.screen, self.wave, self.gold)
+        self.gameover_screen.draw(self.screen, self.wave, self.gold, self.player_id)
 
     # -------------------------
     # CENTRAL DRAW (delegates)
@@ -498,17 +549,27 @@ class Game:
         pygame.display.flip()
         
     def send_score(self):
+        # Evitar reenvíos
+        if getattr(self, "score_sent", False):
+            return
+
+        # Validar player_id
+        if not hasattr(self, 'player_id') or self.player_id is None:
+            # No hay identificador de jugador; no enviamos
+            return
+
+        payload = {
+            "player_id": self.player_id,
+            "waves": self.wave,
+            "duration_seconds": int(time.time() - self.start_time),
+        }
+
         try:
-            requests.post(
-                "http://127.0.0.1:8000/score",
-                json={
-                    "waves": self.wave,
-                    "duration_seconds": int(time.time() - self.start_time),
-                    "played_at": datetime.now().isoformat()
-                },
-                timeout=2
-            )
-        except:
+            resp = requests.post("http://127.0.0.1:8000/score", json=payload, timeout=3)
+            if 200 <= resp.status_code < 300:
+                self.score_sent = True
+        except Exception:
+            # Error de red/timeout - silently fail
             pass
 
     

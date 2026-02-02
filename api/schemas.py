@@ -3,6 +3,7 @@ from datetime import datetime
 
 
 class GameResultCreate(BaseModel):
+    player_id: int
     waves: int
     duration_seconds: int
 
