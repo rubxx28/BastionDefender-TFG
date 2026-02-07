@@ -17,7 +17,16 @@ from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.graphics import Color, Rectangle, RoundedRectangle, Line
 import requests
+import threading
+import uvicorn
+import sys
+import os
 from api_service import APIService
+
+# Agregar el directorio padre al path para poder importar api
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 
 # Tamaño ventana
 Window.size = (400, 700)
@@ -29,6 +38,11 @@ COLOR_ACCENT = (0.8, 0.2, 0.2, 1)       # Rojo
 COLOR_BACKGROUND = (0.15, 0.15, 0.2, 1) # Gris oscuro
 COLOR_TEXT = (1, 1, 1, 1)               # Blanco
 COLOR_SUCCESS = (0.2, 0.7, 0.2, 1)      # Verde
+
+
+def run_api():
+    """Inicia la API en un hilo separado"""
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, log_level="info")
 
 
 class RoundedButton(Button):
@@ -308,7 +322,7 @@ class ResultsScreen(Screen):
         games_list = GridLayout(cols=1, spacing=10, size_hint_y=None, padding=[5, 5])
         games_list.bind(minimum_height=games_list.setter('height'))
         
-        for i, result in enumerate(sorted(results, key=lambda x: x.get('played_at', ''), reverse=True), 1):
+        for i, result in enumerate(sorted(results, key=lambda x: x.get('played_at', '')), 1):
             game_item = self._create_game_item(i, result)
             games_list.add_widget(game_item)
         
@@ -412,6 +426,11 @@ class BastionDefenderApp(App):
     
     def build(self):
         self.title = 'Bastion Defender - Scores'
+        
+        # Iniciar la API en un hilo separado
+        api_thread = threading.Thread(target=run_api, daemon=True)
+        api_thread.start()
+        print("API iniciada en http://127.0.0.1:8000")
         
         sm = ScreenManager(transition=FadeTransition())
         sm.add_widget(SearchScreen())
