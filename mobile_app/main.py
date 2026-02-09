@@ -322,7 +322,7 @@ class ResultsScreen(Screen):
         games_list = GridLayout(cols=1, spacing=10, size_hint_y=None, padding=[5, 5])
         games_list.bind(minimum_height=games_list.setter('height'))
         
-        for i, result in enumerate(sorted(results, key=lambda x: x.get('played_at', '')), 1):
+        for i, result in enumerate(sorted(results, key=lambda x: x.get('played_at', ''), reverse=True), 1):
             game_item = self._create_game_item(i, result)
             games_list.add_widget(game_item)
         
