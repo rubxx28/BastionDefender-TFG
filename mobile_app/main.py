@@ -340,7 +340,17 @@ class ResultsScreen(Screen):
             played_at = str(played_at).split('T')[0]
         
         # Prefijo según oleadas
-        if waves >= 10:
+        if waves >= 50:
+            wave_prefix = '[G.O.A.T.]'
+        elif waves >= 40:
+            wave_prefix = '[IMMORTAL]'
+        elif waves >= 30:
+            wave_prefix = '[SUPREME]'
+        elif waves >= 20:
+            wave_prefix = '[MASTER]'
+        elif waves >= 15:
+            wave_prefix = '[LEGENDARY]'
+        elif waves >= 10:
             wave_prefix = '[EPIC]'
         elif waves >= 5:
             wave_prefix = '[GOOD]'
