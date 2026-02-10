@@ -352,7 +352,7 @@ class Game:
                     if enemy.reached_goal:
                         self.lives -= 1
                     else:
-                        self.gold += 10
+                        self.gold += 5
 
             # Actualizar miniboss si existe
             if self.miniboss:

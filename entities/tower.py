@@ -58,12 +58,24 @@ class BaseTower:
     # BUSCAR OBJETIVO
     # -------------------------
     def find_target(self, enemies):
+        # Si ya tenemos un objetivo, verificar si sigue siendo válido
+        if self.target:
+            # Verificar si el objetivo sigue vivo y dentro del rango
+            if self.target.alive:
+                dist = math.hypot(self.target.x - self.x, self.target.y - self.y)
+                if dist <= self.range:
+                    # El objetivo sigue siendo válido, mantenerlo
+                    return
+        
+        # No hay objetivo válido, buscar el enemigo más cercano
         self.target = None
+        closest_dist = float('inf')
+        
         for enemy in enemies:
             dist = math.hypot(enemy.x - self.x, enemy.y - self.y)
-            if dist <= self.range:
+            if dist <= self.range and dist < closest_dist:
+                closest_dist = dist
                 self.target = enemy
-                return
 
     # -------------------------
     # SPAWN MUZZLE PARTICLES
@@ -293,7 +305,7 @@ class MusketeerTower(BaseTower):
 
     def calculate_upgrade_cost(self):
         """Costo de mejora para torres de mosqueteros: 40 + 30 por nivel"""
-        return 40 + (self.level * 30)
+        return 140 + (self.level * 30)
 
     def load_image(self):
         if self.level == 1:
@@ -331,7 +343,7 @@ class CannonTower(BaseTower):
 
     def calculate_upgrade_cost(self):
         """Costo de mejora para torres de cañón: 60 + 50 por nivel (más cara por ser más fuerte)"""
-        return 60 + (self.level * 50)
+        return 260 + (self.level * 50)
 
     def load_image(self):
         if self.level == 1:
@@ -370,7 +382,7 @@ class MagicTower(BaseTower):
 
     def calculate_upgrade_cost(self):
         """Costo de mejora para torres mágicas: 80 + 40 por nivel (medio término)"""
-        return 80 + (self.level * 40)
+        return 200 + (self.level * 40)
 
     def load_image(self):
         if self.level == 1:

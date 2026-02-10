@@ -131,7 +131,7 @@ class MagicMissile:
         self.alive = True
 
         self.base_image = pygame.image.load("assets/imagenes/projectiles/orbeMagico.png").convert_alpha()
-        self.base_image = pygame.transform.scale(self.base_image, (40, 40))
+        self.base_image = pygame.transform.scale(self.base_image, (35, 35))
         self.image = self.base_image
         self.rect = self.image.get_rect(center=pos)
 
